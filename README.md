@@ -471,3 +471,32 @@ has permissions to create and drop tables.
 
 **If you implement a plugin for a new database, please consider contributing
 it back to the main LinkBench distribution with a pull request.**
+
+
+
+
+## Cassandra support
+
+
+We need to create a new database and tables on the Cassandra server.
+We'll create a new database called `linkdb` and
+the needed tables to store graph nodes and links. We don't create count table here.
+Run the following commands:
+
+    create keyspace linkbench
+        WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 1 };
+    create table nodetable(id bigint,
+                  type int,
+                  version bigint,
+                  time int,
+                  data varchar,
+                  primary key(id));
+    create table linktable(id1 bigint,
+                  id2 bigint,
+                  link_type bigint,
+                  visibility int,
+                  data varchar,
+                  time bigint,
+                  version int,
+                  primary key(id1,id2,link_type));
+                  
