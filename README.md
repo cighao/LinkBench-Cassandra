@@ -483,8 +483,9 @@ We'll create a new database called `linkdb` and
 the needed tables to store graph nodes and links. We don't create count table here.
 Run the following commands:
 
-    create keyspace linkbench
+    create keyspace linkdb
         WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 1 };
+    use linkdb;
     create table nodetable(id bigint,
                   type int,
                   version bigint,
