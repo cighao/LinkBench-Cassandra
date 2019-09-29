@@ -17,9 +17,9 @@ public class LinkStoreCassandra extends GraphStore {
     public static final String CONFIG_HOST = "host";
     public static final String CONFIG_PORT = "port";
     public static final int RETRY_NUM = 5;
-    public static final int DEFAULT_BULKINSERT_SIZE = 10;
+    public static final int DEFAULT_BULKINSERT_SIZE = 40;
 
-    private CqlSession cql_session;
+    private static CqlSession cql_session;
 
     int bulkInsertSize = DEFAULT_BULKINSERT_SIZE;
 
@@ -34,12 +34,14 @@ public class LinkStoreCassandra extends GraphStore {
     Level debuglevel;
     private Phase phase;
 
+    private static int totalThreads = 0;
 
     private final Logger logger = Logger.getLogger(ConfigUtil.LINKBENCH_LOGGER);
 
     public LinkStoreCassandra() {
         super();
     }
+
 
     public void initialize(Properties props, Phase currentPhase,
                            int threadId) throws IOException, Exception {
@@ -80,22 +82,37 @@ public class LinkStoreCassandra extends GraphStore {
         linktable = ConfigUtil.getPropertyRequired(props, Config.LINK_TABLE);
     }
 
-    private void openConnection() throws DriverException {
-        try{
-            cql_session = CqlSession.builder().build();
-        }catch (DriverException e){
-            logger.error("Error while connect Cassandra: ", e);
+    static synchronized boolean openConnection() {
+        if (++totalThreads == 1) {
+            try{
+                assert(cql_session == null);
+                cql_session = CqlSession.builder().build();
+            }catch (DriverException e){
+                throw e;
+            }
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    static synchronized boolean isLastThread() {
+        if (--totalThreads == 0) {
+            return true;
+        } else {
+            return false;
         }
     }
 
     @Override
     public void close() {
-        if(cql_session != null){
-            try{
-                cql_session.close();
-            }catch (DriverException e){
-                logger.error("Error while close Cassandra: ", e);
-            }
+        if(!isLastThread())
+            return ;
+        try{
+            assert(cql_session != null);
+            cql_session.close();
+        }catch (DriverException e){
+            logger.error("Error while close Cassandra: ", e);
         }
     }
 
@@ -407,12 +424,6 @@ public class LinkStoreCassandra extends GraphStore {
     }
 
     @Override
-    public void resetLinkStore(String dbid) throws Exception {
-        String truncate = "TRUNCATE  " + dbid + "." + linktable + ";";
-        cql_session.execute(truncate);
-    }
-
-    @Override
     public long addNode(String dbid, Node node) throws Exception {
         int retry_num = RETRY_NUM;
         while (true) {
@@ -599,6 +610,7 @@ public class LinkStoreCassandra extends GraphStore {
     }
 
     private void test(){
+
         try{
             openConnection();
         }catch(DriverException e){

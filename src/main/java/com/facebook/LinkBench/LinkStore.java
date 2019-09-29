@@ -134,10 +134,6 @@ public abstract class LinkStore {
     return res.toArray(new Link[res.size()]);
   }
 
-  public void resetLinkStore(String dbid) throws Exception{
-    // to do
-  };
-
   /**
    * lookup using just id1, type
    * Does not return hidden links

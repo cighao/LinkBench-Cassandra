@@ -903,12 +903,6 @@ public class LinkStoreMysql extends GraphStore {
   }
 
   @Override
-  public void resetLinkStore(String dbid) throws Exception {
-    stmt_rw.execute(String.format("TRUNCATE TABLE `%s`.`%s`;",
-            dbid, linktable));
-  }
-
-  @Override
   public long addNode(String dbid, Node node) throws Exception {
     while (true) {
       try {
