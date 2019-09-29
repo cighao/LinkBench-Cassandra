@@ -139,12 +139,12 @@ public class LinkStoreCassandra extends GraphStore {
         String query = "select * from " + dbid + "." + linktable
                        + " where id1 = " + link.id1 + " and id2 = "
                        + link.id2 + " and link_type = " + link.link_type + ";";
-        ResultSet rs = cql_session.execute(query);
-        Row row = rs.one();
+       // ResultSet rs = cql_session.execute(query);
+       // Row row = rs.one();
         boolean is_update = false;
-        if(row != null){
-            is_update = true;
-        }
+       // if(row != null){
+       //     is_update = true;
+       // }
         String insert = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
                 + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
                 + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
