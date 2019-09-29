@@ -517,10 +517,11 @@ public class LinkStoreCassandra extends GraphStore {
     }
 
     private boolean updateNodeImpl(String dbid, Node node) throws Exception {
+        // we don't check the type here, because id is the unique primary key
         String update = "UPDATE " + dbid + "." + nodetable + " SET "
                 + "version = " + node.version + ", time = " + node.time
                 + ", data = '" + node.data.toString() + "' WHERE id = "
-                + node.id + " AND type = " + node.type + " if exist allow filtering;";
+                + node.id + " if exists";
 //        if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
 //            logger.trace(update);
 //        }
@@ -568,55 +569,12 @@ public class LinkStoreCassandra extends GraphStore {
     }
 
     public static void main(String[] args){
-        System.out.println("hello cassandra");
-
+//        System.out.println("hello cassandra");
 //        CqlSession session = CqlSession.builder().build();
-//
 //        ResultSet rs = session.execute("select release_version from system.local");
 //        Row row = rs.one();
 //        System.out.println(row.getString("release_version"));
 //
-//        // batch statement
-//        PreparedStatement prepareStatement = session.prepare("INSERT INTO ycsb.usertable(y_id, field0) VALUES (?,?)");
-//        BatchStatementBuilder bsb = BatchStatement.builder(BatchType.LOGGED);
-//        for(int i=32;i<40;i++){
-//            BoundStatement bs = prepareStatement.bind(Integer.toString(100),"aa");
-//            bsb.addStatement(bs);
-//        }
-//        BatchStatement batch = bsb.build();
-//        //rs = session.execute(batch);
-//
-//        //
-//        StringBuilder querySB = new StringBuilder();
-//        querySB.append("select * from ycsb.usertable where y_id in (");
-//        String a = "10";
-//        querySB.append("'");
-//        querySB.append(a);
-//        querySB.append("'");
-//        querySB.append(",'11'");
-//        querySB.append(");");
-//        String query = querySB.toString();
-//        rs = session.execute(query);
-//        List<Row> rows = rs.all();
-//        System.out.println(rows.size());
-//        for(Row r : rows){
-//            System.out.println(r.getString("y_id"));
-//        }
-//        //
-//        StringBuilder s = new StringBuilder();
-//        s.append("select * from ycsb.usertable where y_id > '");
-//        s.append(a);
-//        s.append("' ALLOW FILTERING");
-//        query = s.toString();
-//        rs = session.execute(query);
-//        rows = rs.all();
-//        System.out.println(rows.size());
-//        for(Row r : rows){
-//            System.out.println(r.getString("y_id"));
-//        }
-//
-//        String insert = "INSERT INTO ycsb.usertable(y_id, field0) VALUES ('aaa','"+a+"')";
-//        session.execute(insert);
         LinkStoreCassandra s = new LinkStoreCassandra();
         s.test();
     }
@@ -632,6 +590,7 @@ public class LinkStoreCassandra extends GraphStore {
         link.version = row.getInt("version");
         return link;
     }
+
     private Node createNodeFromRow(Row row) {
         Node node = new Node(row.getLong("id"),
                              row.getInt("type"),
@@ -640,6 +599,7 @@ public class LinkStoreCassandra extends GraphStore {
                              row.getString("data").getBytes());
         return node;
     }
+
     private void test(){
         try{
             openConnection();
@@ -713,48 +673,29 @@ public class LinkStoreCassandra extends GraphStore {
         }*/
 
         // 8. update node
-        /*try{
+        try{
             Node node3 = new Node(1,1,10,100,"aaa".getBytes());
-
+            updateNode(bdid, node3);
         }catch (Exception e){
-            System.out.println("get node failed");
-        }*/
+            System.out.println("update node failed");
+        }
 
         // 9. delete node
-        try{
+        /*try{
             deleteNode(bdid, 2,1);
         }catch (Exception e){
             System.out.println("delete node failed");
-        }
+        }*/
 
         // 10. reset
-        try{
+        /*try{
             resetNodeStore(bdid,0);
             resetLinkStore(bdid);
         }catch (Exception e){
             System.out.println("reset failed");
-        }
+        }*/
 
         cql_session.close();
 
     }
 }
-/*
-
-create keyspace linkbench
-    WITH REPLICATION = {'class' : 'SimpleStrategy', 'replication_factor': 1 };
-    create table nodetable(id bigint,
-              type int,
-              version bigint,
-              time int,
-              data varchar,
-              primary key(id));
-    create table linktable(id1 bigint,
-              id2 bigint,
-              link_type bigint,
-              visibility int,
-              data varchar,
-              time bigint,
-              version int,
-              primary key(id1,id2,link_type));
-*/
