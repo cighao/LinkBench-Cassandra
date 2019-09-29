@@ -1,5 +1,6 @@
 target
 out
+config
 .project
 .classpath
 .settings
@@ -8,5 +9,4 @@ out
 *.iml
 .idea
 .DS_Store
-config
 
