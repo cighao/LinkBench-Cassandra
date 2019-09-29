@@ -708,6 +708,5 @@ public class LinkStoreCassandra extends GraphStore {
         System.out.println("time: " + (end-start)/1000000.0 + " ms");
 
         cql_session.close();
-
     }
 }
