@@ -119,7 +119,6 @@ public class LinkStoreCassandra extends GraphStore {
 //        if (Level.DEBUG.isGreaterOrEqual(debuglevel)) {
 //            logger.debug("addLink " + link.id1 + "." + link.id2 + "." + link.link_type);
 //        }
-        Long start = System.nanoTime();
         String query = "select * from " + dbid + "." + linktable
                        + " where id1 = " + link.id1 + " and id2 = "
                        + link.id2 + " and link_type = " + link.link_type + ";";
@@ -134,8 +133,6 @@ public class LinkStoreCassandra extends GraphStore {
                 + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
                 + link.time + "," + link.version + ")";
         cql_session.execute(insert);
-        Long end = System.nanoTime();
-        System.out.println("add link time: " + (end-start)/1000000.0 + " ms");
         return is_update;
     }
 
@@ -519,7 +516,6 @@ public class LinkStoreCassandra extends GraphStore {
 
     private boolean updateNodeImpl(String dbid, Node node) throws Exception {
         // we don't check the type here, because id is the unique primary key
-        Long start = System.nanoTime();
         String update = "UPDATE " + dbid + "." + nodetable + " SET "
                 + "version = " + node.version + ", time = " + node.time
                 + ", data = '" + node.data.toString() + "' WHERE id = "
@@ -528,8 +524,6 @@ public class LinkStoreCassandra extends GraphStore {
 //            logger.trace(update);
 //        }
         ResultSet rs = cql_session.execute(update);
-        Long end = System.nanoTime();
-        System.out.println("update node time: " + (end-start)/1000000.0 + " ms");
         if(rs.wasApplied()){ // update
             return true;
         }else{  // need to insert
