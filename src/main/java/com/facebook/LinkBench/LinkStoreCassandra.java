@@ -156,7 +156,7 @@ public class LinkStoreCassandra extends GraphStore {
         char[] chars = new char[1024];
         Arrays.fill(chars, 'c');
         String a = new String(chars);
-        String insert = "INSERT INTO  ycsb.usertable(y_id, field0) VALUES ('"+ link.id1 + link.id2 + "','"+a+"')";
+        String insert = "INSERT INTO  ycsb.usertable(y_id, field0) VALUES ('aaaa123','"+a+"')";
         cql_session.execute(insert);
         return is_update;
     }
