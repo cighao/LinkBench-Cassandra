@@ -140,7 +140,6 @@ public class LinkStoreCassandra extends GraphStore {
 //        if (Level.DEBUG.isGreaterOrEqual(debuglevel)) {
 //            logger.debug("addLink " + link.id1 + "." + link.id2 + "." + link.link_type);
 //        }
-        Long start = System.nanoTime();
         String query = "select * from " + dbid + "." + linktable
                        + " where id1 = " + link.id1 + " and id2 = "
                        + link.id2 + " and link_type = " + link.link_type + ";";
@@ -154,17 +153,8 @@ public class LinkStoreCassandra extends GraphStore {
 //                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
 //                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
 //                + link.time + "," + link.version + ")";
-//        cql_session.execute(insert);
-
-        PreparedStatement prepareStatement = cql_session.prepare("INSERT INTO "
-                + dbid + "." + linktable +  "(id1, id2, link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)");
-        BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
-                (int)link.visibility, link.data.toString(), link.time, link.version);
-        cql_session.execute(bs);
-
-
-        Long end = System.nanoTime();
-        time.addAndGet((end-start)/1000000.0);
+        String insert = "INSERT INTO  ycsb.usertable(y_id, field0) VALUES ('"+ link.id1 + "'aaaaaaa)";
+        cql_session.execute(insert);
         return is_update;
     }
 
@@ -454,11 +444,8 @@ public class LinkStoreCassandra extends GraphStore {
     }
 
     private long addNodeImpl(String dbid, Node node) throws Exception {
-        Long start = System.nanoTime();
         long ids[] = bulkAddNodes(dbid, Collections.singletonList(node));
         assert(ids.length == 1);
-        Long end = System.nanoTime();
-        time.addAndGet((end-start)/1000000.0);
         return ids[0];
     }
 
