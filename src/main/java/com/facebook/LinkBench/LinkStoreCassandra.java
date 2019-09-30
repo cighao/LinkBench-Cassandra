@@ -10,6 +10,7 @@ import java.nio.CharBuffer;
 import java.nio.charset.Charset;
 import java.util.*;
 
+import com.google.common.util.concurrent.AtomicDouble;
 import org.apache.log4j.Level;
 import org.apache.log4j.Logger;
 
@@ -20,6 +21,8 @@ public class LinkStoreCassandra extends GraphStore {
     public static final int DEFAULT_BULKINSERT_SIZE = 40;
 
     private static CqlSession cql_session;
+
+    private static AtomicDouble time = new AtomicDouble(0);
 
     int bulkInsertSize = DEFAULT_BULKINSERT_SIZE;
 
@@ -111,6 +114,7 @@ public class LinkStoreCassandra extends GraphStore {
         try{
             assert(cql_session != null);
             cql_session.close();
+            System.out.println("time: " + time.get());
         }catch (DriverException e){
             logger.error("Error while close Cassandra: ", e);
         }
@@ -439,8 +443,11 @@ public class LinkStoreCassandra extends GraphStore {
     }
 
     private long addNodeImpl(String dbid, Node node) throws Exception {
+        Long start = System.nanoTime();
         long ids[] = bulkAddNodes(dbid, Collections.singletonList(node));
         assert(ids.length == 1);
+        Long end = System.nanoTime();
+        time.addAndGet((end-start)/1000000.0);
         return ids[0];
     }
 
