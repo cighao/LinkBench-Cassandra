@@ -140,6 +140,7 @@ public class LinkStoreCassandra extends GraphStore {
 //        if (Level.DEBUG.isGreaterOrEqual(debuglevel)) {
 //            logger.debug("addLink " + link.id1 + "." + link.id2 + "." + link.link_type);
 //        }
+        Long start = System.nanoTime();
         String query = "select * from " + dbid + "." + linktable
                        + " where id1 = " + link.id1 + " and id2 = "
                        + link.id2 + " and link_type = " + link.link_type + ";";
@@ -154,6 +155,8 @@ public class LinkStoreCassandra extends GraphStore {
                 + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
                 + link.time + "," + link.version + ")";
         cql_session.execute(insert);
+        Long end = System.nanoTime();
+        time.addAndGet((end-start)/1000000.0);
         return is_update;
     }
 
