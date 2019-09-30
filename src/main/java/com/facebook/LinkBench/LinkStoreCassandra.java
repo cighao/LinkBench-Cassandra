@@ -153,7 +153,7 @@ public class LinkStoreCassandra extends GraphStore {
 //                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
 //                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
 //                + link.time + "," + link.version + ")";
-        String insert = "INSERT INTO  ycsb.usertable(y_id, field0) VALUES ('"+ link.id1 + "'aaaaaaa)";
+        String insert = "INSERT INTO  ycsb.usertable(y_id, field0) VALUES ('"+ link.id1 + "','aaaaaaa')";
         cql_session.execute(insert);
         return is_update;
     }
