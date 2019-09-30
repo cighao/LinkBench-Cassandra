@@ -150,11 +150,18 @@ public class LinkStoreCassandra extends GraphStore {
        // if(row != null){
        //     is_update = true;
        // }
-        String insert = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
-                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
-                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
-                + link.time + "," + link.version + ")";
-        cql_session.execute(insert);
+//        String insert = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
+//                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
+//                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
+//                + link.time + "," + link.version + ")";
+//        cql_session.execute(insert);
+
+        PreparedStatement prepareStatement = cql_session.prepare("INSERT INTO "
+                + dbid + "." + linktable +  "(id1, id2, link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)");
+        BoundStatement bs = prepareStatement.bind(link.id1,link.id2,link.link_type,link.visibility,link.data.toString(),link.time,link.version);
+        cql_session.execute(bs);
+
+
         Long end = System.nanoTime();
         time.addAndGet((end-start)/1000000.0);
         return is_update;
