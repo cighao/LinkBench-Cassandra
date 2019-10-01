@@ -20,7 +20,8 @@ public class LinkStoreCassandra extends GraphStore {
     public static final int RETRY_NUM = 5;
     public static final int DEFAULT_BULKINSERT_SIZE = 40;
 
-    private static CqlSession cql_session;
+//    private static CqlSession cql_session;
+    private CqlSession cql_session;
 
     private static AtomicDouble time = new AtomicDouble(0);
 
@@ -77,6 +78,7 @@ public class LinkStoreCassandra extends GraphStore {
         // connect
         try {
             openConnection();
+            cql_session = CqlSession.builder().build();
         } catch (Exception e) {
             logger.error("error connecting to database:", e);
             throw e;
@@ -87,12 +89,12 @@ public class LinkStoreCassandra extends GraphStore {
 
     static synchronized boolean openConnection() {
         if (++totalThreads == 1) {
-            try{
-                assert(cql_session == null);
-                cql_session = CqlSession.builder().build();
-            }catch (DriverException e){
-                throw e;
-            }
+//            try{
+//                assert(cql_session == null);
+//                cql_session = CqlSession.builder().build();
+//            }catch (DriverException e){
+//                throw e;
+//            }
             return true;
         } else {
             return false;
@@ -109,12 +111,13 @@ public class LinkStoreCassandra extends GraphStore {
 
     @Override
     public void close() {
-        if(!isLastThread())
+        if(!isLastThread()){
+            cql_session.close();
             return ;
+        }
         try{
             assert(cql_session != null);
             cql_session.close();
-            System.out.println("time: " + time.get());
         }catch (DriverException e){
             logger.error("Error while close Cassandra: ", e);
         }
