@@ -165,10 +165,10 @@ public class LinkStoreCassandra extends GraphStore {
         BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
                     (int)link.visibility, link.data.toString(), link.time, link.version);
         Long t2 = System.nanoTime();
-        time1.getAndAdd((t2-t1/1000000.0));
+        time1.getAndAdd((t2-t1)/1000000.0);
         cql_session.execute(bs);
         Long t3 = System.nanoTime();
-        time1.getAndAdd((t3-t2/1000000.0));
+        time1.getAndAdd((t3-t2)/1000000.0);
 
         return is_update;
     }
