@@ -26,10 +26,6 @@ public class LinkStoreCassandra extends GraphStore {
     private static AtomicDouble time2 = new AtomicDouble(0);
     private static AtomicDouble time3 = new AtomicDouble(0);
 
-    private static String query = "INSERT INTO linkdb.linktable(id1, id2, " +
-            "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
-    private static PreparedStatement prepareStatement;
-
     int bulkInsertSize = DEFAULT_BULKINSERT_SIZE;
 
     String linktable;
@@ -96,7 +92,6 @@ public class LinkStoreCassandra extends GraphStore {
             try{
                 assert(cql_session == null);
                 cql_session = CqlSession.builder().build();
-                prepareStatement = cql_session.prepare(query);
             }catch (DriverException e){
                 throw e;
             }
@@ -162,12 +157,9 @@ public class LinkStoreCassandra extends GraphStore {
                 + link.time + "," + link.version + ")";
         cql_session.execute(insert);*/
 
-//        String query = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, " +
-//                "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
-//        Long t1 = System.nanoTime();
-//        PreparedStatement prepareStatement = cql_session.prepare(query);
-//        Long t2 = System.nanoTime();
-//        time1.getAndAdd((t2-t1)/1000000.0);
+        String query = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, " +
+                "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
+        PreparedStatement prepareStatement = cql_session.prepare(query);
         BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
                     (int)link.visibility, link.data.toString(), link.time, link.version);
         cql_session.execute(bs);
