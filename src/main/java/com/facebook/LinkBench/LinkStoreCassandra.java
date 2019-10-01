@@ -149,13 +149,13 @@ public class LinkStoreCassandra extends GraphStore {
 //        if(row != null){
 //            is_update = true;
 //        }
-//        String insert = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
-//                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
-//                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
-//                + link.time + "," + link.version + ")";
-        int a = (new Random()).nextInt();
-        String insert = "insert into linkdb.linktable(id1,id2,link_type,visibility,data,time,version) values("
-            + a + ",2,23,4,'aaa',1,2)";
+        String insert = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
+                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
+                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
+                + link.time + "," + link.version + ")";
+//        int a = (new Random()).nextInt();
+//        String insert = "insert into linkdb.linktable(id1,id2,link_type,visibility,data,time,version) values("
+//            + a + ",2,23,4,'aaa',1,2)";
         cql_session.execute(insert);
         return is_update;
     }
