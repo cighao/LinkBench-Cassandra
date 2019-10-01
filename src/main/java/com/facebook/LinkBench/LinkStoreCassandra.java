@@ -26,6 +26,10 @@ public class LinkStoreCassandra extends GraphStore {
     private static AtomicDouble time2 = new AtomicDouble(0);
     private static AtomicDouble time3 = new AtomicDouble(0);
 
+    private static String query = "INSERT INTO linkdb.linktable(id1, id2, " +
+            "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
+    private static PreparedStatement prepareStatement;
+
     int bulkInsertSize = DEFAULT_BULKINSERT_SIZE;
 
     String linktable;
@@ -92,6 +96,7 @@ public class LinkStoreCassandra extends GraphStore {
             try{
                 assert(cql_session == null);
                 cql_session = CqlSession.builder().build();
+                prepareStatement = cql_session.prepare(query);
             }catch (DriverException e){
                 throw e;
             }
@@ -116,9 +121,6 @@ public class LinkStoreCassandra extends GraphStore {
         }
         try{
             assert(cql_session != null);
-            System.out.println("time1: " + time1.get());
-            System.out.println("time2: " + time2.get());
-            System.out.println("time3: " + time3.get());
             cql_session.close();
         }catch (DriverException e){
             logger.error("Error while close Cassandra: ", e);
@@ -160,20 +162,15 @@ public class LinkStoreCassandra extends GraphStore {
                 + link.time + "," + link.version + ")";
         cql_session.execute(insert);*/
 
-        String query = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, " +
-                "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
-        Long t1 = System.nanoTime();
-        PreparedStatement prepareStatement = cql_session.prepare(query);
-        Long t2 = System.nanoTime();
-        time1.getAndAdd((t2-t1)/1000000.0);
+//        String query = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, " +
+//                "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
+//        Long t1 = System.nanoTime();
+//        PreparedStatement prepareStatement = cql_session.prepare(query);
+//        Long t2 = System.nanoTime();
+//        time1.getAndAdd((t2-t1)/1000000.0);
         BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
                     (int)link.visibility, link.data.toString(), link.time, link.version);
-        Long t3 = System.nanoTime();
-        time2.getAndAdd((t3-t2)/1000000.0);
         cql_session.execute(bs);
-        Long t4 = System.nanoTime();
-        time3.getAndAdd((t4-t3)/1000000.0);
-
         return is_update;
     }
 
