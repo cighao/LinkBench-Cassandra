@@ -24,6 +24,7 @@ public class LinkStoreCassandra extends GraphStore {
 
     private static AtomicDouble time1 = new AtomicDouble(0);
     private static AtomicDouble time2 = new AtomicDouble(0);
+    private static AtomicDouble time3 = new AtomicDouble(0);
 
     int bulkInsertSize = DEFAULT_BULKINSERT_SIZE;
 
@@ -117,6 +118,7 @@ public class LinkStoreCassandra extends GraphStore {
             assert(cql_session != null);
             System.out.println("time1: " + time1.get());
             System.out.println("time2: " + time2.get());
+            System.out.println("time3: " + time3.get());
             cql_session.close();
         }catch (DriverException e){
             logger.error("Error while close Cassandra: ", e);
@@ -162,13 +164,15 @@ public class LinkStoreCassandra extends GraphStore {
                 "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
         Long t1 = System.nanoTime();
         PreparedStatement prepareStatement = cql_session.prepare(query);
-        BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
-                    (int)link.visibility, link.data.toString(), link.time, link.version);
         Long t2 = System.nanoTime();
         time1.getAndAdd((t2-t1)/1000000.0);
-        cql_session.execute(bs);
+        BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
+                    (int)link.visibility, link.data.toString(), link.time, link.version);
         Long t3 = System.nanoTime();
         time1.getAndAdd((t3-t2)/1000000.0);
+        cql_session.execute(bs);
+        Long t4 = System.nanoTime();
+        time1.getAndAdd((t4-t3)/1000000.0);
 
         return is_update;
     }
