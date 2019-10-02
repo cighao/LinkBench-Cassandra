@@ -84,18 +84,8 @@ public class LinkStoreCassandra extends GraphStore {
         }
     }
 
-    static synchronized boolean isLastThread() {
-        if (--totalThreads == 0) {
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    @Override
-    public void close() {
-        logger.info("exit");
-        if(!isLastThread()){
+    static synchronized void close_cassandra() {
+        if (--totalThreads > 0) {
             return ;
         }
         try{
@@ -104,8 +94,13 @@ public class LinkStoreCassandra extends GraphStore {
             cql_session.close();
             cluster.close();
         }catch (DriverException e){
-            logger.error("Error while close Cassandra: ", e);
+            throw e;
         }
+    }
+
+    @Override
+    public void close() {
+        close_cassandra();
     }
 
     @Override
