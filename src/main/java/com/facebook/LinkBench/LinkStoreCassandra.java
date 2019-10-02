@@ -149,11 +149,10 @@ public class LinkStoreCassandra extends GraphStore {
 //        if(row != null){
 //            is_update = true;
 //        }
-//        String insert = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
-//                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
-//                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
-//                + link.time + "," + link.version + ")";
-        String insert = "INSERT INTO linkdb.linktable(id1, id2, link_type, visibility, data, time, version) VALUES (1,2,3,4,'55',6,7)";
+        String insert = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
+                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
+                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
+                + link.time + "," + link.version + ")";
         cql_session.execute(insert);
 
 //        String query = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, " +
