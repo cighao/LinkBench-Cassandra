@@ -5,9 +5,6 @@ import com.datastax.oss.driver.api.core.DriverException;
 import com.datastax.oss.driver.api.core.DriverExecutionException;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
-import java.nio.CharBuffer;
-import java.nio.charset.Charset;
 import java.util.*;
 
 import com.google.common.util.concurrent.AtomicDouble;
@@ -151,18 +148,19 @@ public class LinkStoreCassandra extends GraphStore {
 //        if(row != null){
 //            is_update = true;
 //        }
-        /*String insert = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
-                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
-                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
-                + link.time + "," + link.version + ")";
-        cql_session.execute(insert);*/
+//        String insert = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
+//                + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
+//                + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
+//                + link.time + "," + link.version + ")";
+        String insert = "INSERT INTO linkdb.linktable(id1, id2, link_type, visibility, data, time, version) VALUES (1,2,3,4,'55',6,7)";
+        cql_session.execute(insert);
 
-        String query = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, " +
-                "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
-        PreparedStatement prepareStatement = cql_session.prepare(query);
-        BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
-                    (int)link.visibility, link.data.toString(), link.time, link.version);
-        cql_session.execute(bs);
+//        String query = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, " +
+//                "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
+//        PreparedStatement prepareStatement = cql_session.prepare(query);
+//        BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
+//                    (int)link.visibility, link.data.toString(), link.time, link.version);
+//        cql_session.execute(bs);
         return is_update;
     }
 
