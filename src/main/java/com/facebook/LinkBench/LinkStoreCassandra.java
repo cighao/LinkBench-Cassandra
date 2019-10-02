@@ -88,7 +88,8 @@ public class LinkStoreCassandra extends GraphStore {
         if (++totalThreads == 1) {
             try{
                 assert(cql_session == null);
-                cql_session = CqlSession.builder().build();
+//                cql_session = CqlSession.builder().build();
+                cql_session = CqlSession.builder().withKeyspace("linkdb").build();
             }catch (DriverException e){
                 throw e;
             }
