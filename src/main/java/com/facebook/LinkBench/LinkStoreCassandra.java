@@ -1,8 +1,8 @@
 package com.facebook.LinkBench;
-import com.datastax.oss.driver.api.core.CqlSession;
-import com.datastax.oss.driver.api.core.cql.*;
-import com.datastax.oss.driver.api.core.DriverException;
-import com.datastax.oss.driver.api.core.DriverExecutionException;
+
+
+import com.datastax.driver.core.exceptions.*;
+import com.datastax.driver.core.*;
 
 import java.io.IOException;
 import java.util.*;
@@ -17,85 +17,70 @@ public class LinkStoreCassandra extends GraphStore {
     public static final int RETRY_NUM = 5;
     public static final int DEFAULT_BULKINSERT_SIZE = 40;
 
-    private static CqlSession cql_session;
+    private static Session cql_session;
+    private static Cluster cluster;
 
-    private static AtomicDouble time1 = new AtomicDouble(0);
-    private static AtomicDouble time2 = new AtomicDouble(0);
-    private static AtomicDouble time3 = new AtomicDouble(0);
+    private static String linktable;
+    private static String counttable;
+    private static String nodetable;
+    private static String host;
+    private static String port;
+    private static String defaultKeySpace;
 
-    int bulkInsertSize = DEFAULT_BULKINSERT_SIZE;
-
-    String linktable;
-    String counttable;
-    String nodetable;
-
-    String host;
-    String port;
-    String defaultKeySpace;
-
-    Level debuglevel;
-    private Phase phase;
-
+    private static Level debuglevel;
+    private static  Phase phase;
     private static int totalThreads = 0;
 
+    private int bulkInsertSize = DEFAULT_BULKINSERT_SIZE;
     private final Logger logger = Logger.getLogger(ConfigUtil.LINKBENCH_LOGGER);
 
     public LinkStoreCassandra() {
         super();
     }
 
-
     public void initialize(Properties props, Phase currentPhase,
                            int threadId) throws IOException, Exception {
         counttable = ConfigUtil.getPropertyRequired(props, Config.COUNT_TABLE);
         if (counttable.equals("")) {
-            String msg = "Error! " + Config.COUNT_TABLE + " is empty!"
-                    + "Please check configuration file.";
+            String msg = "Error! " + Config.COUNT_TABLE + " is empty!" + "Please check configuration file.";
             logger.error(msg);
             throw new RuntimeException(msg);
         }
-
         nodetable = props.getProperty(Config.NODE_TABLE);
         if (nodetable.equals("")) {
-            // For now, don't assume that nodetable is provided
-            String msg = "Error! " + Config.NODE_TABLE + " is empty!"
-                    + "Please check configuration file.";
+            String msg = "Error! " + Config.NODE_TABLE + " is empty!" + "Please check configuration file.";
             logger.error(msg);
             throw new RuntimeException(msg);
         }
-
         host = ConfigUtil.getPropertyRequired(props, CONFIG_HOST);
-
         port = props.getProperty(CONFIG_PORT);
         defaultKeySpace = ConfigUtil.getPropertyRequired(props, Config.DBID);
-
-        if (port == null || port.equals("")) port = "9042"; //use default port
+        if (port == null || port.equals(""))
+            port = "9042";
+        if (host == null || host.equals(""))
+            host = "127.0.0.1";
         debuglevel = ConfigUtil.getDebugLevel(props);
         phase = currentPhase;
-
-        // connect
         try {
-            openConnection();
+            cassandra_init();
         } catch (Exception e) {
             logger.error("error connecting to database:", e);
             throw e;
         }
-
         linktable = ConfigUtil.getPropertyRequired(props, Config.LINK_TABLE);
     }
 
-    static synchronized boolean openConnection() {
-        if (++totalThreads == 1) {
-            try{
-                assert(cql_session == null);
-//                cql_session = CqlSession.builder().build();
-                cql_session = CqlSession.builder().withKeyspace("linkdb").build();
-            }catch (DriverException e){
-                throw e;
-            }
-            return true;
-        } else {
-            return false;
+    static synchronized void cassandra_init(){
+        if (++totalThreads > 1)
+            return ;
+
+        try{
+            assert(cluster == null);
+            assert(cql_session == null);
+            cluster = Cluster.builder().withPort(Integer.parseInt(port)).addContactPoint(host).build();
+            cql_session = cluster.connect(defaultKeySpace);
+        }catch (DriverException e){
+            throw e;
         }
     }
 
@@ -114,9 +99,23 @@ public class LinkStoreCassandra extends GraphStore {
         }
         try{
             assert(cql_session != null);
+            assert(cluster != null);
             cql_session.close();
+            cluster.close();
         }catch (DriverException e){
             logger.error("Error while close Cassandra: ", e);
+        }
+    }
+
+    @Override
+    public void clearErrors(int threadID) {
+        try{
+            cql_session.close();
+            cluster.close();
+            cassandra_init();
+        }catch (Throwable e) {
+            e.printStackTrace();
+            return;
         }
     }
 
@@ -126,7 +125,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return addLinkImpl(dbid, link, noinverse);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -170,7 +169,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return deleteLinkImpl(dbid, id1, link_type, id2, noinverse, expunge);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -234,7 +233,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return getLinkImpl(dbid, id1, link_type, id2);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -258,7 +257,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return multigetLinksImpl(dbid, id1, link_type, id2s);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -314,7 +313,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return getLinkList(dbid, id1, link_type, 0, Long.MAX_VALUE, 0, rangeLimit);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -359,7 +358,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return countLinksImpl(dbid, id1, link_type);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -390,7 +389,7 @@ public class LinkStoreCassandra extends GraphStore {
             try {
                 addBulkLinksImpl(dbid, links, noinverse);
                 return;
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -408,18 +407,18 @@ public class LinkStoreCassandra extends GraphStore {
             return ;
         String query = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, " +
                 "link_type, visibility, data, time, version) VALUES (?,?,?,?,?,?,?)";
-        PreparedStatement prepareStatement = cql_session.prepare(query);
-        BatchStatementBuilder bsb = BatchStatement.builder(BatchType.LOGGED);
-        for(Link link : links) {
-            BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
-                    (int)link.visibility, link.data.toString(), link.time, link.version);
-            bsb.addStatement(bs);
-        }
-        BatchStatement batchStatement = bsb.build();
+//        PreparedStatement prepareStatement = cql_session.prepare(query);
+//        BatchStatementBuilder bsb = BatchStatement.builder(BatchType.LOGGED);
+//        for(Link link : links) {
+//            BoundStatement bs = prepareStatement.bind(link.id1, link.id2, link.link_type,
+//                    (int)link.visibility, link.data.toString(), link.time, link.version);
+//            bsb.addStatement(bs);
+//        }
+//        BatchStatement batchStatement = bsb.build();
 //        if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
 //            logger.trace("INSERT INTO " + dbid + "." + linktable);
 //        }
-        cql_session.execute(batchStatement);
+//        cql_session.execute(batchStatement);
     }
 
 
@@ -440,7 +439,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return addNodeImpl(dbid, node);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -462,7 +461,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return bulkAddNodesImpl(dbid, nodes);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -476,20 +475,20 @@ public class LinkStoreCassandra extends GraphStore {
         long IDs[] = new long[nodes.size()];
         PreparedStatement prepareStatement = cql_session.prepare("INSERT INTO "
                 + dbid + "." + nodetable +  "(id, type, version, time, data) VALUES (?,?,?,?,?)");
-        BatchStatementBuilder bsb = BatchStatement.builder(BatchType.LOGGED);
-        int i = 0;
-        for(Node node : nodes) {
-            BoundStatement bs = prepareStatement.bind(node.id, node.type,
-                                node.version, node.time, node.data.toString());
-            bsb.addStatement(bs);
-            IDs[i++] = node.id;
-        }
-        assert(i == nodes.size());
-        BatchStatement batchStatement = bsb.build();
+//        BatchStatementBuilder bsb = BatchStatement.builder(BatchType.LOGGED);
+//        int i = 0;
+//        for(Node node : nodes) {
+//            BoundStatement bs = prepareStatement.bind(node.id, node.type,
+//                                node.version, node.time, node.data.toString());
+//            bsb.addStatement(bs);
+//            IDs[i++] = node.id;
+//        }
+//        assert(i == nodes.size());
+//        BatchStatement batchStatement = bsb.build();
 //        if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
 //            logger.trace("INSERT INTO " + dbid + "." + linktable);
 //        }
-        cql_session.execute(batchStatement);
+//        cql_session.execute(batchStatement);
         return IDs;
     }
 
@@ -499,7 +498,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return getNodeImpl(dbid, type, id);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -527,7 +526,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return updateNodeImpl(dbid, node);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -560,7 +559,7 @@ public class LinkStoreCassandra extends GraphStore {
         while (true) {
             try {
                 return deleteNodeImpl(dbid, type, id);
-            } catch (DriverExecutionException e) {
+            } catch (DriverException e) {
                 retry_num--;
                 if(retry_num <= 0){
                     throw  e;
@@ -575,17 +574,6 @@ public class LinkStoreCassandra extends GraphStore {
                 " WHERE id = " + id + " if exists";
         ResultSet rs = cql_session.execute(delete);
         return rs.wasApplied();
-    }
-
-    @Override
-    public void clearErrors(int threadID) {
-        try{
-            cql_session.close();
-            openConnection();
-        }catch (Throwable e) {
-            e.printStackTrace();
-            return;
-        }
     }
 
     public static void main(String[] args){
@@ -623,7 +611,7 @@ public class LinkStoreCassandra extends GraphStore {
     private void test(){
 
         try{
-            openConnection();
+            cassandra_init();
         }catch(DriverException e){
             System.out.println("open failed");
         }

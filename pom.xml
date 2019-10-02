@@ -108,10 +108,19 @@
             <artifactId>mysql-connector-java</artifactId>
             <version>5.1.22</version>
         </dependency>
+        <!--  4.2.0  -->
+        <!--
         <dependency>
             <groupId>com.datastax.oss</groupId>
             <artifactId>java-driver-core</artifactId>
             <version>4.2.0</version>
+        </dependency>
+        -->
+        <!-- 3.0.0 -->
+        <dependency>
+            <groupId>com.datastax.cassandra</groupId>
+            <artifactId>cassandra-driver-core</artifactId>
+            <version>3.0.0</version>
         </dependency>
     </dependencies>
 
