@@ -13,7 +13,7 @@ import org.apache.log4j.Logger;
 public class LinkStoreCassandra extends GraphStore {
     public static final String CONFIG_HOST = "host";
     public static final String CONFIG_PORT = "port";
-    public static final int RETRY_NUM = 5;
+    public static final int RETRY_NUM = 3;
     public static final int DEFAULT_BULKINSERT_SIZE = 40;
 
     private static Session cql_session;
@@ -73,6 +73,12 @@ public class LinkStoreCassandra extends GraphStore {
             assert(cql_session == null);
             cluster = Cluster.builder().withPort(Integer.parseInt(port)).addContactPoint(host).build();
             cql_session = cluster.connect(defaultKeySpace);
+            if(phase == Phase.LOAD){
+                String clean_node = "truncate table " + defaultKeySpace + "." + nodetable + "";
+                cql_session.execute(clean_node);
+                String clean_link = "truncate table " + defaultKeySpace + "." + linktable + "";
+                cql_session.execute(clean_link);
+            }
         }catch (DriverException e){
             throw e;
         }
@@ -88,6 +94,7 @@ public class LinkStoreCassandra extends GraphStore {
 
     @Override
     public void close() {
+        logger.info("exit");
         if(!isLastThread()){
             return ;
         }
@@ -322,9 +329,7 @@ public class LinkStoreCassandra extends GraphStore {
         if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
             logger.trace("Query is " + query);
         }
-
         ResultSet rs = cql_session.execute(query);
-
         List<Row> rows = rs.all();
         int size = rows.size();
         if(size == 0)
