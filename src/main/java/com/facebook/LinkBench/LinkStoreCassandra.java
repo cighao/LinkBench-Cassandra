@@ -310,20 +310,15 @@ public class LinkStoreCassandra extends GraphStore {
         }
     }
 
+    @Override
     public Link[] getLinkList(String dbid, long id1, long link_type,
                                      long minTimestamp, long maxTimestamp,
                                      int offset, int limit)throws Exception {
-        /* the similary query in @LinkStoreMysql, but timestamp not used */
-        /*String query = " select id1, id2, link_type," +
+        String query = " select id1, id2, link_type," +
                 " visibility, data, time, version from " + dbid + "." + linktable +
                 " where id1 = " + id1 + " and link_type = " + link_type +
                 " and time >= " + minTimestamp +
                 " and time <= " + maxTimestamp +
-                " and visibility = " + LinkStore.VISIBILITY_DEFAULT +
-                " ALLOW FILTERING";*/
-        String query = " select id1, id2, link_type, visibility, " +
-                "data, time, version from " + dbid + "." + linktable +
-                " where id1 = " + id1 + " and link_type = " + link_type +
                 " and visibility = " + LinkStore.VISIBILITY_DEFAULT +
                 " ALLOW FILTERING";
         if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
