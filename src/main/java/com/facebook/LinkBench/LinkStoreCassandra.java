@@ -317,9 +317,9 @@ public class LinkStoreCassandra extends GraphStore {
         String query = " select id1, id2, link_type," +
                 " visibility, data, time, version from " + dbid + "." + linktable +
                 " where id1 = " + id1 + " and link_type = " + link_type +
-                " and time >= " + minTimestamp +
-                " and time <= " + maxTimestamp +
-                " and visibility = " + LinkStore.VISIBILITY_DEFAULT +
+               // " and time >= " + minTimestamp +
+              //  " and time <= " + maxTimestamp +
+              //  " and visibility = " + LinkStore.VISIBILITY_DEFAULT +
                 " ALLOW FILTERING";
         if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
             logger.trace("Query is " + query);
