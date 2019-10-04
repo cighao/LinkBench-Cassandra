@@ -148,6 +148,9 @@ public class LinkStoreCassandra extends GraphStore {
                 + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
                 + "," + link.link_type + "," + link.visibility + ",'" + link.data + "',"
                 + link.time + "," + link.version + ")";
+        if (Level.DEBUG.isGreaterOrEqual(debuglevel)) {
+            logger.debug("Query is " + insert);
+        }
         cql_session.execute(insert);
         return is_update;
     }
