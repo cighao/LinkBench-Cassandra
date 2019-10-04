@@ -178,9 +178,11 @@ public class LinkStoreCassandra extends GraphStore {
         ResultSet rs = cql_session.execute(query);
 
         int visibility = -1;
+        Link link = null;
         boolean found = false;
         for(Row row : rs){
-            visibility = row.getInt("visibility");
+            link = createLinkFromRow(row);
+            visibility = link.visibility;
             found = true;
         }
         if(!found){
@@ -191,11 +193,11 @@ public class LinkStoreCassandra extends GraphStore {
             // only update visible
             String delete;
             if(!expunge){
-                delete = "UPDATE " + dbid + "." + linktable +
-                        " SET visibility = " + VISIBILITY_HIDDEN +
-                        " WHERE id1 = " + id1 +
-                        " AND id2 = " + id2 +
-                        " AND link_type = " + link_type + ";";
+                // use insert to update visibility (because visibility is primary key)
+                delete = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
+                        + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
+                        + "," + link.link_type + "," + VISIBILITY_HIDDEN + ",'" + link.data + "',"
+                        + link.time + "," + link.version + ")";
             }else{
                 delete = "DELETE FROM " + dbid + "." + linktable +
                         " WHERE id1 = " + id1 +
