@@ -207,7 +207,6 @@ public class LinkStoreCassandra extends GraphStore {
             if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
                 logger.trace(delete);
             }
-            System.out.println(delete);
             cql_session.execute(delete);
         }
         return found;
