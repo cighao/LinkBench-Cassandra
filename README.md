@@ -499,5 +499,12 @@ Run the following commands:
                   data varchar,
                   time bigint,
                   version int,
-                  primary key(id1,id2,link_type));
+                  primary key((id1, link_type, id2), visibility, time, version, data));
                   
+    CREATE TABLE counttable (
+                  id bigint,
+                  link_type bigint,
+                  count int,
+                  time bigint,
+                  version bigint,
+                  PRIMARY KEY (id, link_type));
