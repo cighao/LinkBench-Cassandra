@@ -499,7 +499,7 @@ Run the following commands:
                   data varchar,
                   time bigint,
                   version int,
-                  primary key((id1, link_type, id2), visibility, time, version, data));
+                  primary key((id1, link_type), id2, visibility, time, version, data));
                   
     CREATE TABLE counttable (
                   id bigint,
