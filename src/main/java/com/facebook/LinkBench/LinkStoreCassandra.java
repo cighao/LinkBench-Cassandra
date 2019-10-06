@@ -175,7 +175,7 @@ public class LinkStoreCassandra extends GraphStore {
         if (Level.DEBUG.isGreaterOrEqual(debuglevel)) {
             logger.debug("deleteLink " + id1 + "." + id2 + "." + link_type);
         }
-        String query = "SELECT visibility FROM " + dbid + "." + linktable +
+        String query = "SELECT id1, id2, link_type, visibility, data, time, version FROM " + dbid + "." + linktable +
                        " WHERE id1 = " + id1 + " AND id2 = " + id2 +
                        " AND link_type = " + link_type + " ALLOW FILTERING";
         ResultSet rs = cql_session.execute(query);
