@@ -199,7 +199,7 @@ public class LinkStoreCassandra extends GraphStore {
                 // use insert to update visibility (because visibility is primary key)
                 delete = "INSERT INTO " + dbid + "." + linktable +  "(id1, id2, link_type, "
                         + "visibility, data, time, version) VALUES ("+ link.id1 + "," + link.id2
-                        + "," + link.link_type + "," + VISIBILITY_HIDDEN + ",'" + link.data + "',"
+                        + "," + link.link_type + "," + VISIBILITY_DEFAULT + ",'" + link.data + "',"
                         + link.time + "," + link.version + ")";
             }else{
                 delete = "DELETE FROM " + dbid + "." + linktable +
@@ -267,6 +267,7 @@ public class LinkStoreCassandra extends GraphStore {
                 " visibility, data, time, " +
                 " version from " + dbid + "." + linktable +
                 " where id1 = " + id1 + " and link_type = " + link_type +
+                " and visibility = " + VISIBILITY_DEFAULT +
                 " and id2 in (");
         boolean first = true;
         for (long id2: id2s) {
@@ -322,8 +323,8 @@ public class LinkStoreCassandra extends GraphStore {
         String query = " select id1, id2, link_type," +
                 " visibility, data, time, version from " + dbid + "." + linktable +
                 " where id1 = " + id1 + " and link_type = " + link_type +
-                " and time >= " + minTimestamp +
-                " and time <= " + maxTimestamp +
+               // " and time >= " + minTimestamp +
+               // " and time <= " + maxTimestamp +
                 " and visibility = " + LinkStore.VISIBILITY_DEFAULT +
                 " ALLOW FILTERING";
         if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
