@@ -332,24 +332,28 @@ public class LinkStoreCassandra extends GraphStore {
             logger.trace("Query is " + query);
         }
         ResultSet rs = cql_session.execute(query);
-        List<Row> rows = new ArrayList();
+
+        List<Link> links = new ArrayList();
+
+//        List<Row> rows = new ArrayList();
 
         for (Row row : rs) {
             if (rs.getAvailableWithoutFetching() == 100 && !rs.isFullyFetched())
                 rs.fetchMoreResults();
-            rows.add(row);
+            links.add(createLinkFromRow(row));
         }
+        return links.toArray(new Link[links.size()]);
 
-        int size = rows.size();System.out.println(size);
-        if(size == 0)
-            return null;
-        Link results[] = new Link[size];
-        int i = 0;
-        for(Row row : rows){
-            Link link = createLinkFromRow(row);
-            results[i++] = link;
-        }
-        return results;
+//        int size = rows.size();
+//        if(size == 0)
+//            return null;
+//        Link results[] = new Link[size];
+//        int i = 0;
+//        for(Row row : rows){
+//            Link link = createLinkFromRow(row);
+//            results[i++] = link;
+//        }
+//        return results;
     }
 
     @Override
