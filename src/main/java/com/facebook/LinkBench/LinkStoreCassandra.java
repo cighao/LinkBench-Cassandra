@@ -340,7 +340,7 @@ public class LinkStoreCassandra extends GraphStore {
             rows.add(row);
         }
 
-        int size = rows.size();
+        int size = rows.size();System.out.println(size);
         if(size == 0)
             return null;
         Link results[] = new Link[size];
