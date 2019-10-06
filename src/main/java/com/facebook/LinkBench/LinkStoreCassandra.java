@@ -72,7 +72,7 @@ public class LinkStoreCassandra extends GraphStore {
             assert(cluster == null);
             assert(cql_session == null);
             cluster = Cluster.builder().withPort(Integer.parseInt(port)).addContactPoint(host)
-                    .withQueryOptions(new QueryOptions().setFetchSize(200)).build();
+                    .withQueryOptions(new QueryOptions().setFetchSize(500)).build();
             cql_session = cluster.connect(defaultKeySpace);
             if(phase == Phase.LOAD){
                 String clean_node = "truncate table " + defaultKeySpace + "." + nodetable + "";
@@ -324,10 +324,10 @@ public class LinkStoreCassandra extends GraphStore {
         String query = " select id1, id2, link_type," +
                 " visibility, data, time, version from " + dbid + "." + linktable +
                 " where id1 = " + id1 + " and link_type = " + link_type +
-               // " and time >= " + minTimestamp +
-               // " and time <= " + maxTimestamp +
-                " and visibility = " + LinkStore.VISIBILITY_DEFAULT; //+
-                //" ALLOW FILTERING";
+                " and time >= " + minTimestamp +
+                " and time <= " + maxTimestamp +
+                " and visibility = " + LinkStore.VISIBILITY_DEFAULT +
+                " ALLOW FILTERING";
         if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
             logger.trace("Query is " + query);
         }
