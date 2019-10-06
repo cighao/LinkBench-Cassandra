@@ -71,7 +71,8 @@ public class LinkStoreCassandra extends GraphStore {
         try{
             assert(cluster == null);
             assert(cql_session == null);
-            cluster = Cluster.builder().withPort(Integer.parseInt(port)).addContactPoint(host).build();
+            cluster = Cluster.builder().withPort(Integer.parseInt(port)).addContactPoint(host)
+                    .withQueryOptions(new QueryOptions().setFetchSize(200)).build();
             cql_session = cluster.connect(defaultKeySpace);
             if(phase == Phase.LOAD){
                 String clean_node = "truncate table " + defaultKeySpace + "." + nodetable + "";
