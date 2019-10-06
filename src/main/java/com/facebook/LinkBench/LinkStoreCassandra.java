@@ -177,7 +177,7 @@ public class LinkStoreCassandra extends GraphStore {
         }
         String query = "SELECT visibility FROM " + dbid + "." + linktable +
                        " WHERE id1 = " + id1 + " AND id2 = " + id2 +
-                       " AND link_type = " + link_type + "";
+                       " AND link_type = " + link_type + " ALLOW FILTERING";
         ResultSet rs = cql_session.execute(query);
 
         int visibility = -1;
