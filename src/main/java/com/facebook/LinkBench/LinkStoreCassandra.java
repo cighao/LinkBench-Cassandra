@@ -325,8 +325,8 @@ public class LinkStoreCassandra extends GraphStore {
                 " where id1 = " + id1 + " and link_type = " + link_type +
                // " and time >= " + minTimestamp +
                // " and time <= " + maxTimestamp +
-                " and visibility = " + LinkStore.VISIBILITY_DEFAULT +
-                " ALLOW FILTERING";
+                " and visibility = " + LinkStore.VISIBILITY_DEFAULT; //+
+                //" ALLOW FILTERING";
         if (Level.TRACE.isGreaterOrEqual(debuglevel)) {
             logger.trace("Query is " + query);
         }
