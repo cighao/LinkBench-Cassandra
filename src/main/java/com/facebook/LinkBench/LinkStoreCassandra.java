@@ -332,7 +332,14 @@ public class LinkStoreCassandra extends GraphStore {
             logger.trace("Query is " + query);
         }
         ResultSet rs = cql_session.execute(query);
-        List<Row> rows = rs.all();
+        List<Row> rows = new ArrayList();
+
+        for (Row row : rs) {
+            if (rs.getAvailableWithoutFetching() == 100 && !rs.isFullyFetched())
+                rs.fetchMoreResults();
+            rows.add(row);
+        }
+
         int size = rows.size();
         if(size == 0)
             return null;
